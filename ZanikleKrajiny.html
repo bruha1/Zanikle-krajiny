@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <meta name="description" content="Use Viewer to start building new applications or easily embed Cesium into existing applications.">
+    <meta name="cesium-sandcastle-labels" content="Beginner, Showcases">
+    <title>Cesium Demo</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script
+      type="text/javascript"
+      src="../../../Build/CesiumUnminified/Cesium.js"
+      nomodule
+    ></script>
+    <script type="module" src="../load-cesium-es6.js"></script>
+  </head>
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+<style>
+ @import url(../templates/bucket.css);
+</style>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="zoomButtons"></div>
+<div id="toolbar"></div>
+<img src="../../SampleData/Layout3.png" alt="HTML5 Icon" style="width:220px;height:220px;">
+<script id="cesium_sandcastle_script">
+window.startup = function (Cesium) {
+    'use strict';
+//Sandcastle_Begin
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzY5ZjdkMy1hZWU3LTQ3ZTgtYjBlZi00YTEzODNjNzcwN2YiLCJpZCI6NjgzNzMsImlhdCI6MTYzMjQ4ODUxOH0.vK3ReQEdE7hJgXWFzwqtG5jfgLKcnvO1OkwNVZfKFck";
+const worldTerrain = Cesium.createWorldTerrain({
+  enablePickFeatures: false,
+  requestWaterMask: true,
+  requestVertexNormals: true,
+});
+
+const customTerrainProvider = new Cesium.CesiumTerrainProvider({
+   // url: Cesium.IonResource.fromAssetId(1211374),
+    url: Cesium.IonResource.fromAssetId(1390746)
+    });
+
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  terrainProvider: worldTerrain,
+  infoBox: false
+});
+
+var latMo = 50.4742083;
+var lonMo = 13.6419006;
+var latNM = 48.9592658;
+var lonNM = 16.622849;
+viewer.camera.setView({
+  destination: new Cesium.Cartesian3.fromDegrees(lonMo, latMo, 6500),
+  orientation: {
+    heading : Cesium.Math.toRadians(-40.0), // default value is 0.0 (north)
+    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
+    roll : Cesium.Math.toRadians(10)        // default value
+  },
+});
+
+const scene = viewer.scene;
+const globe = scene.globe;
+
+scene.screenSpaceCameraController.enableCollisionDetection = false;
+globe.translucency.frontFaceAlphaByDistance = new Cesium.NearFarScalar(
+  400.0,
+  0.0,
+  800.0,
+  1.0
+);
+
+
+Sandcastle.addDefaultToolbarButton("Současný stav", function () {
+  viewer.dataSources.removeAll();
+  viewer.terrainProvider = worldTerrain;
+  (async () => {
+	try{
+    const dataSource = await Cesium.GeoJsonDataSource.load("../../SampleData/KNSoucasnyMerge.geojson",
+          {clampToGround: true, height : 0}
+                                  );
+    await viewer.dataSources.add(dataSource);
+      //Get the array of entities
+		const entities = dataSource.entities.values;
+		const colorHash = {};
+		for (let i = 0; i < entities.length; i++) {
+		//For each entity, create a random color based on the Legend field
+			const entity = entities[i];
+			const legend = entity.properties.legenda;
+			let color = colorHash[legend];
+			var outcolor;
+			if (!color) {
+				if (legend == 1) {
+				color = new Cesium.Color(255/255,0,0,0.7);
+				colorHash[name] = color;
+				} else if (legend == 21) {
+				color = new Cesium.Color(178/255,178/255,178/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 3) {
+				color = new Cesium.Color(151/255,219/255,242/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 4) {
+				color = new Cesium.Color(92/255,137/255,68/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 5) {
+				color = new Cesium.Color(245/255,202/255,122/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 77) {
+				color = new Cesium.Color(161/255,235/255,124/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 8) {
+				color = new Cesium.Color(255/255,255/255,190/255,0.7);
+				colorHash[name] = color;
+				}else {
+				color = Cesium.Color.MAROON.withAlpha(0);
+				colorHash[name] = color;
+				}
+				colorHash[name] = color;
+			}
+			//Set the polygon material to our random color.
+			entity.polygon.material = color;
+		}
+  	//await viewer.zoomTo(dataSource);
+	} catch (error) {
+		console.log(error);
+	}
+   })();
+});
+
+Sandcastle.addToolbarButton("Stabilní katastr", function () {
+  viewer.dataSources.removeAll();
+  viewer.terrainProvider = worldTerrain;
+(async () => {
+	try{
+		const dataSource = await Cesium.GeoJsonDataSource.load
+		//('../../SampleData/stabilni_ZqgisMinus164.geojson',{enablePickFeatures: false, clampToGround: true});
+//('../../SampleData/MostStabilniPlus50.geojson',{enablePickFeatures: false});
+//('../../SampleData/StabilniNoveMorig56_50.geojson',{enablePickFeatures: false, clampToGround: true});
+('../../SampleData/stabilniMerge.geojson',{enablePickFeatures: false, clampToGround: true});
+await viewer.dataSources.add(dataSource);
+
+//Get the array of entities
+		const entities = dataSource.entities.values;
+		const colorHash = {};
+		for (let i = 0; i < entities.length; i++) {
+		//For each entity, create a random color based on the Legend field
+			const entity = entities[i];
+    entity.polygon.outline=false;
+			const legend = entity.properties.legenda;
+			let color = colorHash[legend];
+			var outcolor;
+			if (!color) {
+				if (legend == 1) {
+				color = new Cesium.Color(255/255,0,0,0.7);
+				colorHash[name] = color;
+				} else if (legend == 21) {
+				color = new Cesium.Color(178/255,178/255,178/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 3) {
+				color = new Cesium.Color(151/255,219/255,242/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 4) {
+				color = new Cesium.Color(92/255,137/255,68/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 5) {
+				color = new Cesium.Color(245/255,202/255,122/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 77) {
+				color = new Cesium.Color(161/255,235/255,124/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 8) {
+				color = new Cesium.Color(255/255,255/255,190/255,0.7);
+				colorHash[name] = color;
+				}else {
+				color = Cesium.Color.MAROON.withAlpha(0);
+				colorHash[name] = color;
+				}
+				colorHash[name] = color;
+			}
+			//Set the polygon material to our random color.
+			entity.polygon.material = color;
+		}
+		//await viewer.zoomTo(dataSource);
+	} catch (error) {
+		console.log(error);
+	}
+})();
+});
+
+Sandcastle.addToggleButton(
+  "Průhlednost",
+  globe.translucency.enabled,
+  function (checked) {
+    globe.translucency.frontFaceAlphaByDistance = new Cesium.NearFarScalar(400.0, 0.4, 800.0, 1.0);
+    globe.translucency.enabled = checked;
+  }
+);
+
+
+Sandcastle.addToolbarButton("Změna výškových poměrů", function () {
+  viewer.dataSources.removeAll();
+  viewer.terrainProvider = worldTerrain;
+(async () => {
+	try{
+		const dataSource = await Cesium.GeoJsonDataSource.load
+		('../../SampleData/DTMs_DifferenceMerge.geojson',{clampToGround: true});
+		await viewer.dataSources.add(dataSource);
+		//Get the array of entities
+		const entities = dataSource.entities.values;
+		const colorHash = {};
+		for (let i = 0; i < entities.length; i++) {
+		//For each entity, create a random color based on the Legend field
+			const entity = entities[i];
+			const legend = entity.properties.gridcode;
+			let color = colorHash[legend];
+			var outcolor;
+			if (!color) {
+				if (legend == 1) {
+				color = new Cesium.Color(151/255,219/255,242/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 2) {
+				color = new Cesium.Color(178/255,178/255,178/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 3) {
+				color = new Cesium.Color(255/255,255/255,0/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 4) {
+				color = new Cesium.Color(255/255,165/255,0/255,0.7);
+				colorHash[name] = color;
+				} else if (legend == 5) {
+				color = new Cesium.Color(255/255,0/255,0/255,0.7);
+				colorHash[name] = color;
+				}else {
+				color = Cesium.Color.MAROON.withAlpha(0);
+				colorHash[name] = color;
+				}
+				colorHash[name] = color;
+			}
+			//Set the polygon material to our random color.
+			entity.polygon.material = color;
+		}
+		//await viewer.zoomTo(dataSource);
+	} catch (error) {
+		console.log(error);
+	}
+})();
+});  
+
+
+Sandcastle.addToolbarMenu(
+  [
+    {
+      text: "Mostecko",
+      onselect: function () {
+viewer.camera.setView({
+  destination: new Cesium.Cartesian3.fromDegrees(lonMo, latMo, 6500),
+  orientation: {
+    heading : Cesium.Math.toRadians(-40.0), // east, default value is 0.0 (north)
+    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
+    roll : Cesium.Math.toRadians(10)                             // default value
+  },
+});
+viewer.clockViewModel.currentTime = Cesium.JulianDate.fromIso8601(
+  "2017-09-22T04:00:00Z"
+);
+      },
+    },
+    {
+      text: "Nové Mlýny",
+      onselect: function () {
+viewer.camera.setView({
+  destination: new Cesium.Cartesian3.fromDegrees(lonNM, latNM, 6700),
+  orientation: {
+    heading : Cesium.Math.toRadians(180.0), // south, default value is 0.0 (north)
+    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
+    roll : Cesium.Math.toRadians(0)      
+  },
+});
+viewer.clockViewModel.currentTime = Cesium.JulianDate.fromIso8601(
+  "2017-09-22T18:00:00Z"
+);
+      },
+    },
+
+  ],
+  "zoomButtons"
+);
+//Sandcastle_End
+    Sandcastle.finishedLoading();
+};
+if (typeof Cesium !== 'undefined') {
+    window.startupCalled = true;
+    window.startup(Cesium);
+}
+</script>
+</body>
+</html>
